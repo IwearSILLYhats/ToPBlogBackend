@@ -20,7 +20,6 @@ app.use((err, req, res, next) => {
 
 app.use("/posts", postRouter);
 
-app.listen(
-  process.env.PORT,
-  console.log(`Listening on PORT ${process.env.PORT}`)
-);
+app.listen(process.env.PORT, () => {
+  console.log(`Listening on PORT ${process.env.PORT}`);
+});
