@@ -12,7 +12,8 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "/public")));
-
+app.use(express.json());
+app.use(cors());
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send(err);
@@ -20,6 +21,6 @@ app.use((err, req, res, next) => {
 
 app.use("/posts", postRouter);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Listening on PORT ${process.env.PORT}`);
+app.listen(3000, () => {
+  console.log(`Listening on PORT ${3000}`);
 });
