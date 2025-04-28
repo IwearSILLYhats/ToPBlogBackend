@@ -13,7 +13,10 @@ router.get("/:userid", (req, res) => {
 });
 // create a new user
 router.post("/", (req, res) => {
-  return res.json({ message: "create a user" });
+  console.log(req.body);
+  return res.json({
+    message: `Tried to signup under username: ${req.body.username}`,
+  });
 });
 // update a user
 router.put("/:userid", (req, res) => {
