@@ -3,6 +3,8 @@ const router = express.Router();
 const { PrismaClient } = require("../generated/prisma/client");
 const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
+const { authLocal, authJwt } = require("../auth/auth");
+const jwt = require("jsonwebtoken");
 
 // request all users
 router.get("/", (req, res) => {
@@ -12,6 +14,23 @@ router.get("/", (req, res) => {
 router.get("/:userid", (req, res) => {
   return res.json({ message: "request a user" });
 });
+// login a user
+router.post("/login", authLocal, async (req, res) => {
+  if (req.user) {
+    const { id, username } = req.user;
+    const opts = {
+      expiresIn: "30s",
+    };
+    const token = jwt.sign({ id, username }, process.env.SECRET, opts);
+    return res.status(200).json({
+      success: "Successfully logged in",
+      token,
+    });
+  }
+
+  return res.json({ error: "Incorrect email or password", success: null });
+});
+
 // create a new user
 router.post("/", async (req, res) => {
   try {

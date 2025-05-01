@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("node:path");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 const commentRouter = require("./routes/commentRouter");
