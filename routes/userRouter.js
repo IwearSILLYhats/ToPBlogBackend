@@ -14,6 +14,9 @@ router.get("/", (req, res) => {
 router.get("/:userid", (req, res) => {
   return res.json({ message: "request a user" });
 });
+router.get("/:userid/posts", (req, res) => {
+  return res.json({ message: `Requested all posts for ${req.params.userid}` });
+});
 // login a user
 router.post("/login", authLocal, async (req, res) => {
   if (req.user) {
@@ -21,10 +24,11 @@ router.post("/login", authLocal, async (req, res) => {
     const opts = {
       expiresIn: "30s",
     };
-    const token = jwt.sign({ id, username }, process.env.SECRET, opts);
+    const token = jwt.sign({ id }, process.env.SECRET, opts);
     return res.status(200).json({
       success: "Successfully logged in",
       token,
+      user: username,
     });
   }
 
