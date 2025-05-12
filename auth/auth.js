@@ -34,7 +34,6 @@ passport.use(
     }
   )
 );
-
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.SECRET,
@@ -43,15 +42,15 @@ const opts = {
 passport.use(
   new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
-      const user = prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: {
-          id: jwt_payload.sub,
+          id: jwt_payload.id,
         },
       });
       if (user) return done(null, user);
-      else return done(null, false);
+      else return done(null, false, { message: "User not found" });
     } catch (error) {
-      return done(error, false);
+      return done(error, false, { message: "Error on user lookup" });
     }
   })
 );

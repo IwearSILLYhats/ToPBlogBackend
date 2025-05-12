@@ -15,37 +15,37 @@ datasource db {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  username   String    @unique
-  email      String    @unique
-  password   String
-  isVerified Boolean   @default(false)
-  isAdmin    Boolean   @default(false)
-  canComment Boolean   @default(true)
-  post       Post[]
-  comment    Comment[]
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  email       String    @unique
+  password    String
+  is_verified Boolean   @default(false)
+  is_admin    Boolean   @default(false)
+  can_comment Boolean   @default(true)
+  post        Post[]
+  comment     Comment[]
 }
 
 model Post {
-  id            Int       @id @default(autoincrement())
-  title         String
-  content       String?
-  timePublished DateTime?
-  published     Boolean
-  author        User      @relation(fields: [authorId], references: [id])
-  authorId      Int
-  comments      Comment[]
+  id             Int       @id @default(autoincrement())
+  title          String    @default("Untitled Post")
+  content        String?
+  time_published DateTime?
+  published      Boolean   @default(false)
+  author         User      @relation(fields: [author_id], references: [id])
+  author_id      Int
+  comments       Comment[]
 }
 
 model Comment {
-  id            Int       @id @default(autoincrement())
-  author        User      @relation(fields: [authorId], references: [id])
-  authorId      Int
-  timestamp     DateTime  @default(now())
-  content       String?
-  parentPost    Post      @relation(fields: [postId], references: [id])
-  postId        Int
-  parentComment Comment?  @relation("parentChild", fields: [commentId], references: [id])
-  commentId     Int?
-  childComments Comment[] @relation("parentChild")
+  id             Int       @id @default(autoincrement())
+  author         User      @relation(fields: [author_id], references: [id])
+  author_id      Int
+  timestamp      DateTime  @default(now())
+  content        String?
+  parent_post    Post      @relation(fields: [postId], references: [id])
+  postId         Int
+  parent_comment Comment?  @relation("parentChild", fields: [comment_id], references: [id])
+  comment_id     Int?
+  child_comments Comment[] @relation("parentChild")
 }

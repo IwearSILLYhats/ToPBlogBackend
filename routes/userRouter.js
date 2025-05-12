@@ -14,21 +14,36 @@ router.get("/", (req, res) => {
 router.get("/:userid", (req, res) => {
   return res.json({ message: "request a user" });
 });
-router.get("/:userid/posts", (req, res) => {
-  return res.json({ message: `Requested all posts for ${req.params.userid}` });
+
+router.get("/:userid/posts", async (req, res) => {
+  try {
+    const userPosts = await prisma.post.findMany({
+      where: {
+        author_id: parseInt(req.params.userid),
+      },
+    });
+    console.log(userPosts);
+    return res.json(userPosts);
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      message: `Requested all posts for ${req.params.userid} ERROR`,
+    });
+  }
 });
 // login a user
 router.post("/login", authLocal, async (req, res) => {
   if (req.user) {
     const { id, username } = req.user;
     const opts = {
-      expiresIn: "30s",
+      expiresIn: "1h",
     };
     const token = jwt.sign({ id }, process.env.SECRET, opts);
     return res.status(200).json({
       success: "Successfully logged in",
       token,
-      user: username,
+      username: username,
+      id: id,
     });
   }
 
