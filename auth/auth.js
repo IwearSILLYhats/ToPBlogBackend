@@ -59,21 +59,21 @@ const authLocal = passport.authenticate("local", { session: false });
 const authJwt = passport.authenticate("jwt", { session: false });
 
 function checkVerified(req, res, next) {
-  if (req.user && req.user.isVerified) {
+  if (req.user && req.user.is_verified) {
     next();
   } else {
     return res.json({ error: "User account not verified" });
   }
 }
 function checkAdmin(req, res, next) {
-  if (req.user && req.user.isAdmin) {
+  if (req.user && req.user.is_admin) {
     next();
   } else {
     return res.json({ error: "User account is not authorized" });
   }
 }
 function checkComment(req, res, next) {
-  if (req.user && req.user.canComment) {
+  if (req.user && req.user.can_comment) {
     next();
   } else {
     return res.json({

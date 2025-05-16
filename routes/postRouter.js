@@ -10,8 +10,19 @@ router.get("/", (req, res) => {
   return res.json({ message: "Get all posts" });
 });
 // request specific post
-router.get("/:postid", (req, res) => {
-  return res.json({ message: "Get a specific post" });
+router.get("/:postid", async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: parseInt(req.params.postid),
+      },
+    });
+    if (!post) throw new Error({ message: "Requested post not found" });
+    return res.json(post);
+  } catch (error) {
+    console.log(error);
+    return res.json(error.message);
+  }
 });
 // create new post
 router.post("/", authJwt, async (req, res) => {
@@ -33,12 +44,41 @@ router.post("/", authJwt, async (req, res) => {
   }
 });
 // update existing post
-router.put("/:postid", checkVerified, (req, res) => {
-  return res.json({ message: "Update a post" });
+router.put("/:postid", authJwt, async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: parseInt(req.params.postid),
+      },
+    });
+    if (req.user.id !== post.author_id) {
+      throw new Error({ error: "User not authorized to modify this post" });
+    }
+    await prisma.post.update({
+      where: {
+        id: parseInt(req.params.postid),
+      },
+      data: req.body,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({ error: error });
+  }
 });
 // delete existing post
-router.delete("/:postid", checkVerified, (req, res) => {
-  return res.json({ message: "Delete a post" });
+router.delete("/:postid", authJwt, checkVerified, async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: req.params.postid,
+      },
+    });
+    if (post.author_id !== req.user.id) {
+      throw new Error({ error: "User not authorized to delete this post." });
+    }
+  } catch (error) {
+    return res.json({ error: error });
+  }
 });
 // pass to comment router for comments under postId
 router.all("/:postid/comments", commentRouter);
