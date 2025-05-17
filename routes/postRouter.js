@@ -36,7 +36,7 @@ router.post("/", authJwt, async (req, res) => {
       throw new Error("Error creating new post");
     }
     return res.status(200).json({
-      message: "Post successfully created",
+      success: "Post successfully created",
       id: newPost.id,
     });
   } catch (error) {
@@ -60,6 +60,7 @@ router.put("/:postid", authJwt, async (req, res) => {
       },
       data: req.body,
     });
+    return res.json({ error: null, success: "Post updated successfully!" });
   } catch (error) {
     console.log(error);
     return res.json({ error: error });
@@ -70,12 +71,21 @@ router.delete("/:postid", authJwt, checkVerified, async (req, res) => {
   try {
     const post = await prisma.post.findUnique({
       where: {
-        id: req.params.postid,
+        id: parseInt(req.params.postid),
       },
     });
     if (post.author_id !== req.user.id) {
       throw new Error({ error: "User not authorized to delete this post." });
     }
+    await prisma.post.delete({
+      where: {
+        id: parseInt(post.id),
+      },
+    });
+    return res.json({
+      error: null,
+      success: "Post successfully deleted.",
+    });
   } catch (error) {
     return res.json({ error: error });
   }

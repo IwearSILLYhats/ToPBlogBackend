@@ -22,7 +22,6 @@ router.get("/:userid/posts", async (req, res) => {
         author_id: parseInt(req.params.userid),
       },
     });
-    console.log(userPosts);
     return res.json(userPosts);
   } catch (error) {
     console.log(error);
