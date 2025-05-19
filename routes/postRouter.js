@@ -6,8 +6,28 @@ const commentRouter = require("./commentRouter");
 const { authJwt, checkVerified } = require("../auth/auth");
 
 // find all posts
-router.get("/", (req, res) => {
-  return res.json({ message: "Get all posts" });
+router.get("/", async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      select: {
+        id: true,
+        title: true,
+        author: {
+          select: {
+            username: true,
+          },
+        },
+      },
+      where: {
+        published: true,
+      },
+    });
+    if (!posts) throw new Error({ error: "No published posts found." });
+    return res.json({ posts });
+  } catch (error) {
+    console.log(error);
+    return res.json({ error: error });
+  }
 });
 // request specific post
 router.get("/:postid", async (req, res) => {
@@ -54,6 +74,7 @@ router.put("/:postid", authJwt, async (req, res) => {
     if (req.user.id !== post.author_id) {
       throw new Error({ error: "User not authorized to modify this post" });
     }
+    if (req.body.published) req.body.time_published = new Date();
     await prisma.post.update({
       where: {
         id: parseInt(req.params.postid),
