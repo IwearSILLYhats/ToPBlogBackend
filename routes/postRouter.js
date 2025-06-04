@@ -5,6 +5,24 @@ const prisma = new PrismaClient();
 const commentRouter = require("./commentRouter");
 const { authJwt, checkVerified } = require("../auth/auth");
 
+// pass to comment router for comments under postId
+router.use("/:postid/comments", commentRouter);
+
+// request specific post
+router.get("/:postid", async (req, res) => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: parseInt(req.params.postid),
+      },
+    });
+    if (!post) throw new Error({ message: "Requested post not found" });
+    return res.json(post);
+  } catch (error) {
+    console.log(error);
+    return res.json(error.message);
+  }
+});
 // find all posts
 router.get("/", async (req, res) => {
   try {
@@ -29,21 +47,7 @@ router.get("/", async (req, res) => {
     return res.json({ error: error });
   }
 });
-// request specific post
-router.get("/:postid", async (req, res) => {
-  try {
-    const post = await prisma.post.findUnique({
-      where: {
-        id: parseInt(req.params.postid),
-      },
-    });
-    if (!post) throw new Error({ message: "Requested post not found" });
-    return res.json(post);
-  } catch (error) {
-    console.log(error);
-    return res.json(error.message);
-  }
-});
+
 // create new post
 router.post("/", authJwt, async (req, res) => {
   try {
@@ -111,7 +115,5 @@ router.delete("/:postid", authJwt, checkVerified, async (req, res) => {
     return res.json({ error: error });
   }
 });
-// pass to comment router for comments under postId
-router.all("/:postid/comments", commentRouter);
 
 module.exports = router;
