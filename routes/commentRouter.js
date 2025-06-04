@@ -56,7 +56,7 @@ router.post("/", authJwt, async (req, res) => {
       post_id: parseInt(req.params.postid),
     };
     if (req.body.parent) {
-      newComment.comment_id = parseInt(req.body.parent);
+      newComment.comment_id = parseInt(req.body.commentid);
     }
     await prisma.comment.create({
       data: newComment,
@@ -67,12 +67,63 @@ router.post("/", authJwt, async (req, res) => {
   }
 });
 // edit existing comment
-router.put("/:commentid", (req, res) => {
-  return res.json({ message: "Update a comment" });
+router.put("/", authJwt, async (req, res) => {
+  try {
+    const comment = await prisma.comment.findUnique({
+      where: {
+        id: parseInt(req.body.commentid),
+      },
+    });
+    if (!comment) {
+      throw new Error("Comment no longer exists");
+    }
+    if (comment.author_id !== req.user.id) {
+      throw new Error("Not authorized to edit this comment");
+    }
+    await prisma.comment.update({
+      where: {
+        id: comment.id,
+      },
+      data: {
+        content: req.body.content,
+      },
+    });
+    return res.json({
+      error: null,
+      success: `Commentid ${comment.id} successfully updated`,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({ error: error, success: null });
+  }
 });
 // delete existing comment
-router.delete("/:commentid", (req, res) => {
-  return res.json({ message: "Delete a comment" });
+router.delete("/", authJwt, async (req, res) => {
+  try {
+    const comment = await prisma.comment.findUnique({
+      where: {
+        id: parseInt(req.body.commentid),
+      },
+    });
+    if (!comment) {
+      throw new Error("Comment no longer exists");
+    }
+    if (comment.author_id !== req.user.id) {
+      throw new Error("Not authorized to delete this comment");
+    }
+    await prisma.comment.delete({
+      where: {
+        id: comment.id,
+      },
+    });
+    return res.json({
+      error: null,
+      success: `Commentid ${comment.id} successfully deleted`,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({ error: error, success: null });
+  }
 });
 
 module.exports = router;
